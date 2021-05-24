@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>frpg app</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <figure id="conf-list-area">
+    <figcaption class="title" data-i18n="title">conf list</figcaption>
+
+    <div id="confs-control-panel">
+      <div>
+        <input type="checkbox" id="select-all-conf-btn">
+        <label for="select-all-conf-btn" class="pointer" data-i18n="select-all" title="select/unselect all">
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </label>
+      </div>
+      <div id="conf-config-area">
+        <button type="button" class="iconfont icon-add" title="add new conf"></button>
+
+        <button type="button" class="iconfont icon-folder" name="confs-folder" data-i18n="open-conf-folder"
+          title="open confs folder"></button>
+
+        <button type="button" data-i18n="refresh" name="confs-refresh" title="refresh conf list">refresh</button>
+      </div>
+    </div>
+    <ul id="conf-list"></ul>
+  </figure>
+
+  <footer id="bottom-panel">
+    <button type="button" id="settings" data-i18n="settings" class="iconfont icon-setting">settings</button>
+    <button type="button" id="run" data-i18n="run" class="iconfont icon-run">run</button>
+    <button type="button" id="stop" data-i18n="stop" class="iconfont icon-stop">stop</button>
+  </footer>
+</body>
+<script>
+  const api = "http://127.0.0.1:59999/api"
+</script>
+<script src="index.js"></script>
+<script src="util/i18n-text.js"></script>
+<script src="util/convert-lang.js"></script>
+<script src="util/frp-ctrl.js"></script>
+
+</html>

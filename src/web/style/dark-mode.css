@@ -1,0 +1,7 @@
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: rgba(34, 33, 33, 0.75);
+    color: whitesmoke;
+  }
+}
