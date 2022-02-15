@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <figure id="conf-list-area">
+    <figcaption data-i18n="title">conf list</figcaption>
+    <div id="conf-list-control">
+        <label for="select-all-conf-btn" data-i18n="select-all" title="select/unselect all">
+          <input type="checkbox" id="select-all-conf-btn">
+        </label>
+      <div id="conf-list-control-panel">
+        <button type="button" class="iconfont icon-add" name="add-conf" title="add new conf"></button>
+        <button type="button" class="iconfont icon-folder" name="open-conf-dir" data-i18n="open-conf-folder"
+          title="open confs folder"></button>
+        <button type="button" name="refresh-conf-list" data-i18n="refresh" title="refresh conf list">refresh</button>
+      </div>
+    </div>
+    <ul id="conf-list"></ul>
+  </figure>
+
+  <footer id="bottom-panel">
+    <button type="button" id="settings" data-i18n="settings" class="iconfont icon-setting">settings</button>
+    <button type="button" id="run-all" data-i18n="run" class="iconfont icon-run">run</button>
+    <button type="button" id="stop-all" data-i18n="stop" class="iconfont icon-stop">stop</button>
+  </footer>
+</body>
+<script src="util/i18n-text.js"></script>
+<script src="util/frp-ctrl.js"></script>
+<script src="index.js"></script>
+
+</html>
