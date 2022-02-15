@@ -1,37 +1,34 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
-var FrpcPath string = ""
-var FrpsPath string = ""
+var frpcPath string
+var frpsPath string
 
 type ConfInfo struct {
-	Id      int      `json:"id"`      //conf index num
-	Name    string   `json:"name"`    //conf name
-	Running bool     `json:"running"` //true/false
-	path    string   //conf path
-	channel chan int //channel for running frp
+	Id      int    `json:"id"`      //conf index num
+	Name    string `json:"name"`    //conf name
+	Running bool   `json:"running"` //true/false
+	Pid     int    `json:"pid"`
+	Path    string //conf path
+	// channel chan int //channel for rtunning frp
 }
 
 //conf map
-var frpConfList = make(map[string]*ConfInfo, 1)
-
-//stop frp
-func stopfrp(confId string) {
-	<-frpConfList[confId].channel
-}
+var frpConfList map[string]*ConfInfo
 
 //list frp ini files
 func listfrpConfs(frpConfDir string) {
 	fileListInfo, _ := os.ReadDir(frpConfDir)
-	// fileList := make([]string, 1)
-	frpConfList = make(map[string]*ConfInfo, 1)
+	frpConfList = make(map[string]*ConfInfo, len(fileListInfo))
 	for index, fileInfo := range fileListInfo {
 		fileName := fileInfo.Name()
 		if path.Ext(fileName) != ".ini" {
@@ -41,31 +38,39 @@ func listfrpConfs(frpConfDir string) {
 			Id:      index,
 			Name:    strings.Replace(fileName, ".ini", "", 1),
 			Running: false,
-			path:    frpConfDir + "/" + fileName,
+			Pid:     0,
+			Path:    frpConfDir + "/" + fileName,
 		}
 	}
 }
 
-func runfrp(confId string) {
-	frpTaskInfo := frpConfList[confId]
-	frpConfFile := frpTaskInfo.path
+func frpRun(confId string) {
+	frpConfFile := frpConfList[confId].Path
 
-	if frpTaskInfo.channel == nil {
-		frpConfList[confId].channel = make(chan int)
-	}
-	channel := frpConfList[confId].channel
-
-	cmd := exec.Command(FrpcPath, "-c", frpConfFile)
+	cmd := exec.Command(frpcPath, "-c", frpConfFile)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: false}
 	cmd.Start()
 
 	frpConfList[confId].Running = true
+	frpConfList[confId].Pid = cmd.Process.Pid
+	fmt.Println("[frp info]", "pid:", cmd.Process.Pid, " conf:", frpConfFile)
+}
 
-	go func() {
-		channel <- cmd.Process.Pid
-		cmd.Process.Kill()
-		cmd.Wait()
-		frpConfList[confId].Running = false
-	}()
+//stop frp
+func frpStop(confId string) {
+	process, _ := os.FindProcess(frpConfList[confId].Pid)
+	process.Kill()
+	frpConfList[confId].Running = false
+	process.Wait()
+}
+
+//stop all
+func stopfrpAll() {
+	for k, v := range frpConfList {
+		if v.Running {
+			frpStop(k)
+		}
+	}
 }
 
 func checkfrp(frpFile string) string {
@@ -77,6 +82,6 @@ func checkfrp(frpFile string) string {
 }
 
 func init() {
-	FrpcPath = checkfrp("frpc")
-	FrpsPath = checkfrp("frps")
+	frpcPath = checkfrp("frpc")
+	frpsPath = checkfrp("frps")
 }
