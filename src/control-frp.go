@@ -1,11 +1,13 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
-	"strconv"
 	"strings"
 	"syscall"
 )
@@ -14,32 +16,51 @@ var frpcPath string
 var frpsPath string
 
 type ConfInfo struct {
-	Id      int    `json:"id"`      //conf index num
+	md5     string `json:"md5"`
 	Name    string `json:"name"`    //conf name
 	Running bool   `json:"running"` //true/false
 	Pid     int    `json:"pid"`
 	Path    string //conf path
-	// channel chan int //channel for rtunning frp
 }
 
 //conf map
 var frpConfList map[string]*ConfInfo
 
+func getMd5(filePath string) string {
+	f, _ := os.Open(filePath)
+	defer f.Close()
+	h := md5.New()
+	io.Copy(h, f)
+	return hex.EncodeToString(h.Sum(nil))
+}
+
 //list frp ini files
 func listfrpConfs(frpConfDir string) {
 	fileListInfo, _ := os.ReadDir(frpConfDir)
-	frpConfList = make(map[string]*ConfInfo, len(fileListInfo))
-	for index, fileInfo := range fileListInfo {
+
+	if frpConfList == nil {
+		frpConfList = make(map[string]*ConfInfo, len(fileListInfo))
+	}
+
+	for _, fileInfo := range fileListInfo {
 		fileName := fileInfo.Name()
 		if path.Ext(fileName) != ".ini" {
 			continue
 		}
-		frpConfList[strconv.Itoa(index)] = &ConfInfo{
-			Id:      index,
+
+		filePath := frpConfDir + "/" + fileName
+		md5Str := getMd5(frpConfDir + "/" + fileName)
+
+		if _, ok := frpConfList[md5Str]; ok {
+			continue
+		}
+
+		frpConfList[md5Str] = &ConfInfo{
+			md5:     md5Str,
 			Name:    strings.Replace(fileName, ".ini", "", 1),
 			Running: false,
 			Pid:     0,
-			Path:    frpConfDir + "/" + fileName,
+			Path:    filePath,
 		}
 	}
 }

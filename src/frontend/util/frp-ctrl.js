@@ -6,20 +6,17 @@ const confConfigArea = document.getElementById('conf-list-control-panel')
 const selectAllConfBtn = document.getElementById("select-all-conf-btn")
 const confListEle = document.getElementById('conf-list')
 
-
-//todo 是否可以通过eval更新frpState信息
-
 //frpState={'1':'running'}  //index:state
 const frpState = new Proxy({}, {
     set(obj, prop, val) {
-        let [disableBtnName, showBtnName] = ['run', 'stop']
+        let [disableBtnName, enableBtnName] = ['run', 'stop']
         if (val === 'stop') {
-            [disableBtnName, showBtnName] = ['stop', 'run']
+            [disableBtnName, enableBtnName] = ['stop', 'run']
         }
-        const targetItemEle = document.querySelector('#conf-item-' + prop)
+        const targetItemEle = document.getElementById('conf-item-' + prop)
 
         targetItemEle.querySelector(`button[name=${disableBtnName}]`).disabled = true
-        targetItemEle.querySelector(`button[name=${showBtnName}]`).disabled = false
+        targetItemEle.querySelector(`button[name=${enableBtnName}]`).disabled = false
     }
 })
 
@@ -27,7 +24,6 @@ const frpState = new Proxy({}, {
 function generateConfList(confsInfo) {
     confsInfo = JSON.parse(confsInfo)
     allConfs = new Set(Object.keys(confsInfo))
-
     let HTML = ''
     for (const key in confsInfo) {
         const name = confsInfo[key].name
@@ -36,7 +32,7 @@ function generateConfList(confsInfo) {
         //"${selectedConfs.has(key)?'checked':''}"
         HTML += `<li id="conf-item-${key}" data-conf-id="${key}">
     <div data-conf-id="${key}">
-      <input type="checkbox" name="select" id="item-checkbox-${key}" >
+      <input type="checkbox" id="item-checkbox-${key}" name="select" ${selectedConfs.has(key)?'checked':''} />
       <label for="item-checkbox-${key}">${name}</label>
     </div>
     <div data-conf-id="${key}">
